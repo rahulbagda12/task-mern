@@ -11,6 +11,7 @@ import socket from '../utils/socket';
 export default function TopNav() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const isAdmin = user?.role === 'admin';
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -21,8 +22,12 @@ export default function TopNav() {
   );
 
   useEffect(() => {
+    if (isAdmin) {
+      setAttendance(null);
+      return;
+    }
     fetchAttendance();
-  }, [user]);
+  }, [user, isAdmin]);
 
   const fetchAttendance = async () => {
     try {
@@ -146,38 +151,40 @@ export default function TopNav() {
         )}
 
         {/* Attendance widget */}
-        <div className="hidden sm:flex items-center gap-2 mr-2">
-          {attendance?.checkIn ? (
-            <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
-              <div className="flex flex-col items-start leading-none">
-                 <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Shift Start</span>
-                 <span className="text-xs font-black text-slate-700 dark:text-slate-200">{new Date(attendance.checkIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-              </div>
-              {!attendance.checkOut ? (
-                <button 
-                  onClick={handleCheckOut}
-                  className="p-1.5 bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-lg hover:bg-rose-600 hover:text-white transition-all ml-1"
-                  title="Check Out"
-                >
-                  <Square size={14} fill="currentColor" />
-                </button>
-              ) : (
-                <div className="flex flex-col items-start leading-none ml-2 pl-2 border-l border-slate-200 dark:border-slate-700">
-                   <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Shift End</span>
-                   <span className="text-xs font-black text-slate-700 dark:text-slate-200">{new Date(attendance.checkOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+        {!isAdmin && (
+          <div className="hidden sm:flex items-center gap-2 mr-2">
+            {attendance?.checkIn ? (
+              <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+                <div className="flex flex-col items-start leading-none">
+                   <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Shift Start</span>
+                   <span className="text-xs font-black text-slate-700 dark:text-slate-200">{new Date(attendance.checkIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
-              )}
-            </div>
-          ) : (
-            <button 
-              onClick={handleCheckIn}
-              className="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white rounded-xl text-sm font-bold transition-all border border-emerald-200/50 dark:border-emerald-500/20"
-            >
-              <Play size={14} fill="currentColor" />
-              Check In
-            </button>
-          )}
-        </div>
+                {!attendance.checkOut ? (
+                  <button 
+                    onClick={handleCheckOut}
+                    className="p-1.5 bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-lg hover:bg-rose-600 hover:text-white transition-all ml-1"
+                    title="Check Out"
+                  >
+                    <Square size={14} fill="currentColor" />
+                  </button>
+                ) : (
+                  <div className="flex flex-col items-start leading-none ml-2 pl-2 border-l border-slate-200 dark:border-slate-700">
+                     <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Shift End</span>
+                     <span className="text-xs font-black text-slate-700 dark:text-slate-200">{new Date(attendance.checkOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button 
+                onClick={handleCheckIn}
+                className="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white rounded-xl text-sm font-bold transition-all border border-emerald-200/50 dark:border-emerald-500/20"
+              >
+                <Play size={14} fill="currentColor" />
+                Check In
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Dark Mode Toggle */}
         <button
